@@ -14,9 +14,6 @@ import subprocess
 import pytz
 import datetime
 
-# client gpu_idx
-gpu_idx = 14
-
 def get_owner(pid):
     try:
         for line in open('/proc/%d/status' % pid):
@@ -26,7 +23,7 @@ def get_owner(pid):
     except:
         return None
 
-def get_info():
+def get_info(gpu_idx):
     time_stamp = "{0:%Y%m%d-%H-%M-%S}".format(datetime.datetime.now(tz=pytz.timezone("Asia/Chongqing")))
     info = { 'gpu': [], 'gpu_idx': gpu_idx, 'ts':time_stamp}
     msg = subprocess.Popen('nvidia-smi', stdout = subprocess.PIPE).stdout.read().decode()
@@ -56,12 +53,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--address', default = '172.16.0.247', help = 'the ip of server')
 parser.add_argument('--port', default = '5678', help = 'server port, default: 5678')
 parser.add_argument('--persecond', default = 20, help = 'watch gpu_mem frequency, default:20s')
+parser.add_argument('--gpu_idx', default = '14', help = 'the idx of gpu')
 opt = parser.parse_args()
 
 url = 'http://%s:%s' % (opt.address, opt.port)
 
 while True:
-    mean_info = get_info()
+    mean_info = get_info(opt.gpu_idx)
     datas = json.dumps(mean_info)
     # print(datas)
     print(f"ts: {mean_info['ts']}")
